@@ -64,7 +64,33 @@
 
         <!--<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>-->
 
-        <?php if($this->uri->segment(1) == "login" || $this->uri->segment(1) == "signup"): ?>
+        <?php if($this->uri->segment(1) == "login"): ?>
         <!--<script src='https://www.google.com/recaptcha/api.js'></script>-->
         <?php endif; ?>
+
+        <link rel="manifest" href="/manifest.json" />
+        <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+        <script>
+            var OneSignal = window.OneSignal || [];
+            OneSignal.push(function() {
+                OneSignal.init({
+                    appId: "cc85030b-ce95-48bc-8d44-94905592bf15",
+                });
+            });
+            OneSignal.push(function() {
+                OneSignal.getUserId(function(userId) {
+                    $.ajax({
+                        type:"post",
+                        url: "<?= base_url("dashboard/register_push/"); ?>",
+                        data: {
+                            user_id: userId
+                        },
+                        success:function(response)
+                        {
+                            
+                        }
+                    }); 
+                });
+            });
+        </script>
     </head>

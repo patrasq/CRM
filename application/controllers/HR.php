@@ -130,9 +130,9 @@ class HR extends CI_Controller {
 
             $data["open_project"]               =   $this->HR_model->get_projects(array("ID", "Name"));
             
-            $var1                               =   $this->Dashboard_model->get_tasks();
-            $var2                               =   $this->Dashboard_model->get_issues_graph();
-            $var3                               =   $this->Dashboard_model->get_milestones_graph();
+            $var1                               =   $this->Dashboard_model->get_tasks($this->uri->segment(3));
+            $var2                               =   $this->Dashboard_model->get_issues_graph($this->uri->segment(3));
+            $var3                               =   $this->Dashboard_model->get_milestones_graph($this->uri->segment(3));
 
             $tasks_return_months                =   array();
             $issues_return_months               =   array();
@@ -142,27 +142,33 @@ class HR extends CI_Controller {
             $issues_dates = array();
             $milestones_dates = array();
 
-            foreach($var1 as $row) {
-                if(isset($row["CompletedOn"]) && $row["CompletedOn"] != null) {
-                    $tasks_dates[]    =   $row["CompletedOn"];
-                } elseif(isset($row["CompleteDate"]) && $row["CompleteDate"] != null) {
-                    $tasks_dates[]    =   $row["CompleteDate"];
+            if($var1) {
+                foreach($var1 as $row) {
+                    if(isset($row["CompletedOn"]) && $row["CompletedOn"] != null) {
+                        $tasks_dates[]    =   $row["CompletedOn"];
+                    } elseif(isset($row["CompleteDate"]) && $row["CompleteDate"] != null) {
+                        $tasks_dates[]    =   $row["CompleteDate"];
+                    }
                 }
             }
 
-            foreach($var2 as $row) {
-                if(isset($row["CompletedOn"]) && $row["CompletedOn"] != null) {
-                    $issues_dates[]    =   $row["CompletedOn"];
-                } elseif(isset($row["CompleteDate"]) && $row["CompleteDate"] != null) {
-                    $issues_dates[]    =   $row["CompleteDate"];
+            if($var2) {
+                foreach($var2 as $row) {
+                    if(isset($row["CompletedOn"]) && $row["CompletedOn"] != null) {
+                        $issues_dates[]    =   $row["CompletedOn"];
+                    } elseif(isset($row["CompleteDate"]) && $row["CompleteDate"] != null) {
+                        $issues_dates[]    =   $row["CompleteDate"];
+                    }
                 }
             }
 
-            foreach($var3 as $row) {
-                if(isset($row["CompletedOn"]) && $row["CompletedOn"] != null) {
-                    $milestones_dates[]    =   $row["CompletedOn"];
-                } elseif(isset($row["CompleteDate"]) && $row["CompleteDate"] != null) {
-                    $milestones_dates[]    =   $row["CompleteDate"];
+            if($var3) {
+                foreach($var3 as $row) {
+                    if(isset($row["CompletedOn"]) && $row["CompletedOn"] != null) {
+                        $milestones_dates[]    =   $row["CompletedOn"];
+                    } elseif(isset($row["CompleteDate"]) && $row["CompleteDate"] != null) {
+                        $milestones_dates[]    =   $row["CompleteDate"];
+                    }
                 }
             }
 
@@ -654,7 +660,6 @@ class HR extends CI_Controller {
 
             $objWriter = new PHPExcel_Writer_Excel2007($excel);
             $objWriter->setIncludeCharts(TRUE);
-            $objWriter->save("ceva.xlsx");
             
                         // We'll be outputting an excel file
             header('Content-type: application/vnd.ms-excel');
@@ -664,7 +669,6 @@ class HR extends CI_Controller {
 
             // Write file to the browser
             $objWriter->save('php://output');
-            flash_redirect("success", "Excel downloaded successfully", base_url("hr/employee/".$u_id));
 
         }
 

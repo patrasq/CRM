@@ -82,7 +82,7 @@ $text_finance_accounting    = "Accounting";
                 </p>
                 <ul class="menu-list">
                     <li><a href="<?= base_url("dashboard"); ?>" <?= is_menu_active("dashboard", "shouldbeerror"); ?>><?= $text_home; ?></a></li>
-                    <li><a href="<?= base_url("settings/account"); ?>" <?= is_menu_active("settings"); ?>><?= $text_settings; ?></a></li>
+                    <?php if($this->session->userdata("logged_in")["Type"] == 2) { ?> <li><a href="<?= base_url("dashboard/add_user"); ?>" <?= is_menu_active("add_user"); ?>>Add account</a></li> <?php } ?>
                 </ul>
                 <p class="menu-label">
                     <?= $text_hr; ?>
@@ -117,5 +117,13 @@ $text_finance_accounting    = "Accounting";
                         </ul>
                     </li>
                 </ul>
+
+                <?php if(get_info("Read", $this->config->config["tables"]["notifications"], "Reciever", $this->session->userdata("logged_in")["ID"]) == 0): ?>
+                <div class="notification is-warning is-bold">
+                    <button class="delete"></button>
+                    <?= get_info("Content", $this->config->config["tables"]["notifications"], "Reciever", $this->session->userdata("logged_in")["ID"]); ?>
+                </div>
+                <?php endif; ?>
+
             </aside>
         </div>

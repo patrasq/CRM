@@ -36,19 +36,19 @@ class Dashboard_model extends CI_model {
         else return 0;
     }
 
-    function get_tasks() {
-        
+    function get_tasks($id) {
+
         $array = array();
-        
-        $query1 = $this->db->query("SELECT Name, ProjectID, Type, CompletedOn FROM ".$this->config->config['tables']['issues']." WHERE `AssignedTo` = '" . $this->session->userdata("logged_in")["ID"]."'");
+
+        $query1 = $this->db->query("SELECT Name, ProjectID, Type, CompletedOn FROM ".$this->config->config['tables']['issues']." WHERE `AssignedTo` = '" . $id."'");
         if($query1->num_rows()) {
             foreach($query1->result_array() as $row) {
                 $row["z"] = "issue";
                 $array[] = $row;
             }
         }
-        
-        $query2 = $this->db->query("SELECT Name, ProjectID, CompleteDate FROM ".$this->config->config['tables']['milestones']." WHERE `AssignedTo` = '".$this->session->userdata('logged_in')["ID"]."'");
+
+        $query2 = $this->db->query("SELECT Name, ProjectID, CompleteDate FROM ".$this->config->config['tables']['milestones']." WHERE `AssignedTo` = '".$id."'");
         if($query2->num_rows()) {
             foreach($query2->result_array() as $row) {
                 $row["Type"] = null;
@@ -56,7 +56,7 @@ class Dashboard_model extends CI_model {
                 $array[] = $row;
             }
         }
-        
+
         /*
         $this->db->
             select('a.Name as issues_name, a.ProjectID as issues_id, b.Name as milestones_name, b.ProjectID as milestones_id, a.Type as issues_type')
@@ -67,16 +67,36 @@ class Dashboard_model extends CI_model {
 
         return $array;
     }
-    
-    function get_issues_graph() {
-        $query = $this->db->query("SELECT Name, ProjectID, Type, CompletedOn FROM ".$this->config->config['tables']['issues']." WHERE `CompletedBy` = '" . $this->session->userdata("logged_in")["ID"]."'");
+
+    /* public function get_departments($data)
+    *
+    * Get departments for a specific business
+    *
+    * @param string $fetch_data Data to retrieve
+    * @return array Fetched data 
+    */
+    function get_departments() {
+        $this->db->cache_on();
+
+        $this->db->select("*");
+        $this->db->from($this->config->config['tables']['departments']);
+
+        $q = $this->db->get();
+        if($q->num_rows()) {
+            foreach ($q->result() as $row) $data[] = $row;
+            return $data;
+        } else return FALSE;
+    }
+
+    function get_issues_graph($id) {
+        $query = $this->db->query("SELECT Name, ProjectID, Type, CompletedOn FROM ".$this->config->config['tables']['issues']." WHERE `CompletedBy` = '" . $id."'");
         if($query->num_rows()) {
             return $query->result_array();
         } else return null;
     }
-    
-    function get_milestones_graph() {
-        $query = $this->db->query("SELECT Name, ProjectID, CompleteDate FROM ".$this->config->config['tables']['milestones']." WHERE `CompletedBy` = '".$this->session->userdata('logged_in')["ID"]."'");
+
+    function get_milestones_graph($id) {
+        $query = $this->db->query("SELECT Name, ProjectID, CompleteDate FROM ".$this->config->config['tables']['milestones']." WHERE `CompletedBy` = '".$id."'");
         if($query->num_rows()) {
             return $query->result_array();
         } else return null;
@@ -90,10 +110,17 @@ class Dashboard_model extends CI_model {
         $this->db->or_where("AssignedTo4", $this->session->userdata("logged_in")["ID"]);
         $this->db->or_where("AssignedTo5", $this->session->userdata("logged_in")["ID"]);
         $this->db->or_where("Supervizor", $this->session->userdata("logged_in")["ID"]);
+        $this->db->where("Status", 0);
         $this->db->from($this->config->config['tables']['projects']);
         $query = $this->db->get();
 
         return ($query ? $query->result_array() : false);
+    }
+
+    public function push_usersignal($u_id, $id) {
+        $this->db->where('ID', $id);
+        $this->db->update($this->config->config['tables']['accounts'], array("OneSignal"=>$u_id));
+        return TRUE;
     }
 
 }

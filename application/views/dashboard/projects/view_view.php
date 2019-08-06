@@ -4,8 +4,19 @@
     <h3 class="title bigname"><?= html_purify($project_name); ?></h3>
     <br>
     <?php if($this->session->userdata("logged_in")["Type"] == 1) {  ?>
+     <?php if(
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo1", $this->config->config["tables"]["projects"], "ID", $project_id) || 
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo2", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo3", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo4", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo5", $this->config->config["tables"]["projects"], "ID", $project_id)
+                            ) { ?>
     <br>
     <a href="<?= base_url("projects/discharge/" . $project_id); ?>" class="button custom-button-normal open-modal">discharge from this project</a>
+    <br>
+    <?php } } ?>
+    <?php if($this->session->userdata("logged_in")["Type"] == 2 && $completed_tasks == $max_tasks && $project_status == 0) { ?>
+    <a href="<?= base_url("projects/deliver/" . $project_id); ?>" class="button custom-button-normal open-modal">deliver project</a>
     <?php } ?>
     <br>
     <div class="columns">
@@ -17,6 +28,15 @@
                         <li class="tab is-active" onclick="openTab(event,'general')"><a>General</a></li>
                         <li class="tab" onclick="openTab(event,'milestones')"><a>Milestones</a></li>
                         <li class="tab" onclick="openTab(event,'issues')"><a>Issues</a></li>
+                        <?php if(
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo1", $this->config->config["tables"]["projects"], "ID", $project_id) || 
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo2", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo3", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo4", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo5", $this->config->config["tables"]["projects"], "ID", $project_id)
+                            ) { ?>
+                        <li class="tab" onclick="openTab(event,'mytasks')"><a>My tasks</a></li>
+                        <?php } ?>
                     </ul>
                 </div>
             </nav>
@@ -56,13 +76,8 @@
                     <br>
                     <span><a href='<?= get_profile($row["AssignedTo".$incrementor]); ?>'><?= get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo' . $incrementor]) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo' . $incrementor]); ?></a></span>
                     <?php $incrementor++; }}else echo "No team member."; ?>
-                    <hr>
 
-                    <h4 class="subtitle">Time management</h4>
-                    <label class="label" style="display:inline-block;">Milestones per day</label> &nbsp; <abbr title="<?= $project_deadline; ?>"><?= get_time_difference($project_deadline); ?></abbr>
-                    <br>
-                    <label class="label" style="display:inline-block;">Milestones per week</label> &nbsp; <abbr title="<?= $project_deadline; ?>"><?= get_time_difference($project_deadline); ?></abbr>
-                    <hr>
+
                 </div>
                 <div id="milestones" class="content-tab" style="display:none">
                     <div class="card modern-shadow aos-init aos-animate" data-aos="fade-up" data-aos-delay="100" data-aos-offset="200" data-aos-easing="ease-out-quart">
@@ -118,7 +133,7 @@
                             </div>
                         </div>
                     </div>
-                    <?php if($this->session->userdata("logged_in")["Type"] == 2) {  ?>
+                    <?php if($this->session->userdata("logged_in")["Type"] == 2 && $project_status == 0) {  ?>
                     <br>
                     <a href="#" class="button custom-button-normal open-modal" data-modal-id="#addmilestone">Add milestone</a>
                     <?php } ?>
@@ -177,14 +192,52 @@
                             </div>
                         </div>
                     </div>
+                    <?php if($project_status == 0) { ?>
                     <br>
                     <a href="#" class="button custom-button-normal open-modal" data-modal-id="#addissue">Add issue</a>
+                    <?php } ?>
                 </div>
+                
+                <?php if(
+                    $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo1", $this->config->config["tables"]["projects"], "ID", $project_id) || 
+                    $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo2", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                    $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo3", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                    $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo4", $this->config->config["tables"]["projects"], "ID", $project_id) ||
+                    $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo5", $this->config->config["tables"]["projects"], "ID", $project_id)
+                ) { ?>
+                <div id="mytasks" class="content-tab" style="display:none">
+                    <div class="card modern-shadow aos-init aos-animate" data-aos="fade-up" data-aos-delay="100" data-aos-offset="200" data-aos-easing="ease-out-quart">
+                        <div class="card-content">
+                            <div class="content has-text-centered">
+                                <div class="">
+                                    <div class="columns is-multiline">
+                                        <?php foreach($my_task as $row) {  ?>
+                                            <div class="column is-one-third">
+                                                <div class="card modern-shadow" style="background:<?= $gradients[array_rand($gradients)]; ?>" data-aos="fade-up" data-aos-delay="450" data-aos-offset="200" data-aos-easing="ease-out-quart" class="aos-init aos-animate">
+                                                    <div class="card-content">
+                                                        <div class="content">
+                                                            <h5 class="subtitle"><?= $row["Name"]; ?></h5>
+                                                            <?php if($row["Type"] != null) echo '<span style="border-color: #fff;color: #fff;" class="button is-small is-outlined '.get_issue_color($row["Type"]) . '">' .$row["Type"] . '</span>'; else echo "MILESTONE"; ?>
+                                                            <br><br>
+                                                            <a class="button is-outlined is-light" href="<?= base_url("projects/view/".$row["ProjectID"]); ?>">See project</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            <?php } ?>
             </div>
         </div>
         <?php $this->load->view('dashboard/footer'); ?>
 
-        <?php if($this->session->userdata("logged_in")["Type"] == 2) {  ?>
+        <?php if($this->session->userdata("logged_in")["Type"] == 2 && $project_status == 0) {  ?>
 
         <div class="modal" id="addmilestone">
             <div class="modal-background close-modal" data-modal-id="#addmilestone"></div>
@@ -216,6 +269,7 @@
 
         <?php }  ?>
 
+        <?php if($project_status == 0) { ?>
         <div class="modal" id="addissue">
             <div class="modal-background close-modal" data-modal-id="#addissue"></div>
             <div class="modal-content">
@@ -258,7 +312,8 @@
             </div>
             <button class="modal-close close-modal is-large" data-modal-id="#addissue" aria-label="close"></button>
         </div>
-
+        <?php } ?>
+        
         <script>
             $('#departments').on('change', function() {
                 //this.value

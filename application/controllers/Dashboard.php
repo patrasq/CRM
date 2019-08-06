@@ -44,6 +44,48 @@ class Dashboard extends CI_Controller {
                 break;
         }
 
+        $var1                               =   $this->Dashboard_model->get_tasks($this->session->userdata("logged_in")["ID"]);
+
+        $tasks_return_months                =   array();
+
+        $tasks_dates = array();
+
+        foreach($var1 as $row) {
+            if(isset($row["CompletedOn"]) && $row["CompletedOn"] != null) {
+                $tasks_dates[]    =   $row["CompletedOn"];
+            } elseif(isset($row["CompleteDate"]) && $row["CompleteDate"] != null) {
+                $tasks_dates[]    =   $row["CompleteDate"];
+            }
+        }
+        
+        for($i = 0; $i < sizeof($tasks_dates); $i++) {
+            for($increment_month = 0; $increment_month < 12; $increment_month++) {
+                $php_date = getdate(strtotime($tasks_dates[$i]));
+                if(intval(date("m", strtotime($tasks_dates[$i]))) == $increment_month)
+                    @$tasks_return_months[$increment_month] = $tasks_return_months[$increment_month]+1;
+            }
+        }
+
+        $months = json_decode('{"january":0,"february":0,"march":0,"april":0,"may":0,"june":0,"july":0,"august":0,"september":0,"october":0,"november":0,"december":0}', true);
+
+        $tasks_months = $months;
+
+        for($i = 1; $i <= 12; $i++) {
+            if(isset($tasks_return_months[$i]))
+                $tasks_months[get_month_name($i-1)] = $tasks_return_months[$i];
+        }
+
+        $tasks_js =   "[";
+        foreach($tasks_months as $key => $value) {
+
+            $tasks_js .= "'" . $value . "',";
+        }
+        $tasks_js = rtrim( $tasks_js, "," );
+        $tasks_js .= "]";
+
+        //die(print_r($tasks_return_months));
+        $data["tasks_completed_monthly"]      = $tasks_js;
+
         $data["gradients"]                  =   array(
             "linear-gradient(45deg,#ffa836,#ffcf00 100%)",
             "linear-gradient(45deg,#3690ff,#00d2ff 100%)",
@@ -148,19 +190,56 @@ class Dashboard extends CI_Controller {
     }
 
     public function add_user() {
-        if($this->session->userdata("logged_in")["ID"]) {
-            if($this->form_validation->run() == FALSE)
-            {
-                $data["main_content"]               = 'dashboard/add_account';
-                $this->load->view('includes/template.php', $data);
-            }
-            else
-            {
-                $email          = $this->input->post('email');
+        if($this->session->userdata("logged_in")["Type"] !== 2) {
 
-                if(strlen($email) && strlen($password)) {
+            $data["department"]                 = $this->Dashboard_model->get_departments();
+            $data["main_content"]               = 'dashboard/add_account';
+            $this->load->view('includes/template.php', $data);
+        }
+    }
+
+    public function add_user_2() {
+        if($this->session->userdata("logged_in")["Type"] !== 2) {
+            if(
+                $this->input->post("firstname")     !== null  &&  post_parameter_set($this->input->post("firstname")) &&
+                $this->input->post("lastname")      !== null  &&  post_parameter_set($this->input->post("lastname"))  &&
+                $this->input->post("department")    !== null  &&  post_parameter_set($this->input->post("department"))&&
+                $this->input->post("position")      !== null  &&  post_parameter_set($this->input->post("position"))  &&
+                $this->input->post("gender")        !== null  &&  post_parameter_set($this->input->post("gender"))    &&
+                $this->input->post("phone")         !== null  &&  post_parameter_set($this->input->post("phone"))     &&
+                $this->input->post("address")       !== null  &&  post_parameter_set($this->input->post("address"))   &&
+                $this->input->post("birthdate")     !== null  &&  post_parameter_set($this->input->post("birthdate")) &&
+                $this->input->post("hiredsince")    !== null  &&  post_parameter_set($this->input->post("hiredsince")) &&
+                $this->input->post("email")         !== null  &&  post_parameter_set($this->input->post('email'))     && 
+                $this->input->post("type")          !== null  &&  post_parameter_set($this->input->post('type'))     
+            ) {
+
+                $this->load->model('User_model');
+                $this->load->model('HR_model');
+
+                /*
+                *
+                * Purify submitted information, then check it's integrity
+                *
+                */
+                $first_name     =   html_purify($this->input->post("firstname"));
+                $last_name      =   html_purify($this->input->post("lastname"));
+                $department     =   (int)$this->input->post("department"); 
+                $position       =   html_purify($this->input->post("position")); 
+                $gender         =   html_purify($this->input->post("gender"));
+                $phone          =   html_purify($this->input->post("phone")); // o sa vad eu
+                $address        =   html_purify($this->input->post("address")); // o sa vad eu
+                $birth_date     =   strtotime($this->input->post("birthdate"));
+                $hired_since    =   strtotime($this->input->post("hiredsince"));
+                $email          =   $this->input->post('email');
+                $type           =   (int)$this->input->post('type');
+
+                if(!exists($department, $this->config->config['tables']['departments'], "ID")) flash_redirect("error", "Invalid department.", base_url("hr/employees")); // Check if the submitted department exists
+                if(!in_array($gender, array("Male", "Female"))) flash_redirect("error", "Invalid gender.", base_url("hr/employees")); // Check if the submitted gender is valid (personally I recognize only men and women)
+                if(!in_array($type, array("0", "1"))) flash_redirect("error", "Invalid type.", base_url("hr/employees")); 
+
+                if(strlen($email)) {
                     if(!exists($email, $this->config->config['tables']['accounts'], "EMail")) {
-
 
                         $remoteIp = $this->input->ip_address();
 
@@ -174,7 +253,7 @@ class Dashboard extends CI_Controller {
                             "Password"      => $encoded_password,
                             "Salt"          => $salt,
                             "IP"            => $this->input->ip_address(),
-                            "Completed"     => 0
+                            "Type"          => $type
                         );
 
                         $reg_data           = array(
@@ -185,36 +264,54 @@ class Dashboard extends CI_Controller {
                         );
 
                         if($this->User_model->insert_user($post_data, $reg_data)) {
-                            $this->load->library('email');
+                            $department = get_info("Name", $this->config->config['tables']['departments'], "ID", $department);
 
-                            $config['protocol']     = 'smtp';
-                            $config['smtp_host']    = 'ssl://smtp.gmail.com';
-                            $config['smtp_port']    = '465';
-                            $config['smtp_timeout'] = '7';
-                            $config['smtp_user']    = '';
-                            $config['smtp_pass']    = '';
-                            $config['charset']      = 'utf-8';
-                            $config['newline']      = "\r\n";
-                            $config['mailtype']     = 'html';
-                            $config['validation']   = TRUE;  
+                            $employee_data = array(
+                                "FirstName"     => $first_name,
+                                "LastName"      => $last_name,
+                                "Department"    => $department,
+                                "Position"      => $position,
+                                "Gender"        => $gender,
+                                "Phone"         => $phone,
+                                "Street"        => $address,
+                                "Birth"         => $birth_date,
+                                "HiredSince"    => $hired_since
+                            );
 
-                            $this->email->initialize($config);
+                            if($this->HR_model->insert_employee($employee_data)) {
+                                $this->db->cache_delete('hr', 'departments');
+                                $this->db->cache_delete('hr', 'employees');
 
-                            $this->email->from('mailer@LeMonkey.com', 'LeMonkey');
-                            $this->email->to($email);
+                                $this->load->library('email');
 
-                            $this->email->subject('\xF0\x9F\x94\xA5 You have been added to LeMonkey');
+                                $config['protocol']     = 'smtp';
+                                $config['smtp_host']    = 'ssl://smtp.gmail.com';
+                                $config['smtp_port']    = '465';
+                                $config['smtp_timeout'] = '7';
+                                $config['smtp_user']    = '';
+                                $config['smtp_pass']    = '';
+                                $config['charset']      = 'utf-8';
+                                $config['newline']      = "\r\n";
+                                $config['mailtype']     = 'html';
+                                $config['validation']   = TRUE;  
 
+                                $this->email->initialize($config);
 
-                            $message_to_show = "You have been added to LeMonkey. Your credentials are the following:<br><b>EMail:</b> $email<br><b>Password:</b> $password";
+                                $this->email->from('mailer@LeMonkey.com', 'LeMonkey');
+                                $this->email->to($email);
 
-                            $this->email->send();
-                            $flash_to_show = ($this->session->userdata('language') == "english") ? "An email containing further information has been sent to that email address. Thanks! \xF0\x9F\x98\x81" : "Un mail care conține informațiile necesare inregistrării a fost trimis către adresa indicată. Mulțumim! \xF0\x9F\x98\x81";
+                                $this->email->subject('\xF0\x9F\x94\xA5 You have been added to LeMonkey');
 
-                            flash_redirect('success', 'Added successfully.', base_url("dashboard"));
+                                $message_to_show = "You have been added to LeMonkey. Your credentials are the following:<br><b>EMail:</b> $email<br><b>Password:</b> $password";
+
+                                $this->email->send();
+                                $flash_to_show = ($this->session->userdata('language') == "english") ? "An email containing further information has been sent to that email address. Thanks! \xF0\x9F\x98\x81" : "Un mail care conține informațiile necesare inregistrării a fost trimis către adresa indicată. Mulțumim! \xF0\x9F\x98\x81";
+
+                                flash_redirect("success", "Employee added successfully.", base_url("dashboard"));
+                            } else flash_redirect("error", "Something wrong happened.", base_url("hr/employees"));
                         } 
                     }
-                }
+                } else flash_redirect('error', 'Something went wrong.', base_url("dashboard"));
             } else flash_redirect('error', 'Something went wrong.', base_url("dashboard"));
         }
     }
@@ -238,6 +335,11 @@ class Dashboard extends CI_Controller {
     public function logout() {
         $this->session->sess_destroy();
         flash_redirect('success', 'You have signed out.', base_url());
+    }
+    
+    public function register_push() {
+        $user_id    =   $this->input->post('user_id');
+        return $this->Dashboard_model->push_usersignal($user_id, $this->session->userdata("logged_in")["ID"]) ? true : false;
     }
 }
 ?>

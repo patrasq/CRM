@@ -117,9 +117,10 @@
                         <th>Export excel data (.xsls)</th>
                         <td><a href="<?= base_url("hr/download_excel/" . $employee_id); ?>">Download</a></td>
                     </tr>
+                    <?php if($this->session->userdata("logged_in")["Type"] == 2) { ?>
                     <tr>
                         <th>Assign project</th>
-                        <?php echo form_open(base_url("hr/force_assign_project/" . $employee_id)); ?>
+                        <?php echo form_open(base_url("projects/force_assign_project/" . $employee_id)); ?>
                         <td>
                             <select name="project" class="input">
                                 <?php foreach($open_project as $row) { ?>
@@ -132,6 +133,7 @@
                         </td>
                         <?php echo form_close(); ?>
                     </tr>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>

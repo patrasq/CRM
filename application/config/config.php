@@ -441,7 +441,7 @@ $config['csrf_token_name'] = '_token';
 $config['csrf_cookie_name'] = '_cookie';
 $config['csrf_expire'] = 3600;
 $config['csrf_regenerate'] = TRUE;
-$config['csrf_exclude_uris'] = array("LeMonkey/loadtest");
+$config['csrf_exclude_uris'] = array("dashboard/register_push");
 
 /*
 |--------------------------------------------------------------------------
@@ -520,7 +520,8 @@ $config['tables'] = array(
     'logins'                 => 'logins',
     'projects'               => 'projects',
     'milestones'             => 'projects_milestones',
-    'issues'                 => 'projects_issues'
+    'issues'                 => 'projects_issues',
+    'notifications'          => 'notifications'
 );
 
 $config['recaptcha_sitekey'] = '6LctA1cUAAAAAEt6Q--_aC4sidzRtEp-y6cLrT3D';

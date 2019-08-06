@@ -76,13 +76,15 @@
                                 <div class="media-content">
                                     <div class="content">
                                         <div class="columns">
-                                            <div class="column is-one-quarter">
+                                            <div class="column">
                                                 <span><?= $row["Name"]; ?></span>
                                             </div>
-                                            <div class="column">
-                                                <span><?= $row["Description"]; ?></span>
+                                            <div class="column is-half">
+                                                <span>
+                                                    <?= mb_substr($row["Description"], 0, 150) . "..."; ?>
+                                                </span>
                                             </div>
-                                            <div class="column">
+                                            <div class="column is-centered has-text-centered">
                                                 <span><a class="button is-primary is-rounded" href="<?= base_url("projects/view/" . $row["ID"]); ?>">Go</a></span>
                                             </div>
                                         </div>
@@ -107,18 +109,18 @@
                         <div class="box dashboardtablebox">
                             <div class="columns is-multiline">
                                 <?php foreach($task as $row) {  ?>
-                                    <div class="column is-one-third">
-                                        <div class="card modern-shadow" style="background:<?= $gradients[array_rand($gradients)]; ?>" data-aos="fade-up" data-aos-delay="450" data-aos-offset="200" data-aos-easing="ease-out-quart" class="aos-init aos-animate">
-                                            <div class="card-content">
-                                                <div class="content">
-                                                    <h5 class="subtitle"><?= $row["Name"]; ?></h5>
-                                                    <?php if($row["Type"] != null) echo '<span style="border-color: #fff;color: #fff;" class="button is-small is-outlined '.get_issue_color($row["Type"]) . '">' .$row["Type"] . '</span>'; else echo "MILESTONE"; ?>
-                                                    <br><br>
-                                                    <a class="button is-outlined is-light" href="<?= base_url("projects/view/".$row["ProjectID"]); ?>">See project</a>
-                                                </div>
+                                <div class="column is-one-third">
+                                    <div class="card modern-shadow" style="background:<?= $gradients[array_rand($gradients)]; ?>" data-aos="fade-up" data-aos-delay="450" data-aos-offset="200" data-aos-easing="ease-out-quart" class="aos-init aos-animate">
+                                        <div class="card-content">
+                                            <div class="content">
+                                                <h5 class="subtitle"><?= $row["Name"]; ?></h5>
+                                                <?php if($row["Type"] != null) echo '<span style="border-color: #fff;color: #fff;" class="button is-small is-outlined '.get_issue_color($row["Type"]) . '">' .$row["Type"] . '</span>'; else echo "MILESTONE"; ?>
+                                                <br><br>
+                                                <a class="button is-outlined is-light" href="<?= base_url("projects/view/".$row["ProjectID"]); ?>">See project</a>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
                                 <?php } ?>
                             </div>
                         </div>
@@ -183,12 +185,12 @@
     var instagram_chart = new Chart(efficiency_graph, {
         type: 'line',
         data: {
-            labels: ['Latest post', 'Post #2', 'Post #3', 'Post #4', 'Post #5', 'Post #6', 'Post #7', 'Post #8', 'Post #9', 'Post #10'],
+            labels: ['January','February','March','April','May','June','July','August','September','October','November','December'],
             datasets: [{
-                label: 'Likes',
-                data: ['23','23','223','5523','23','23','4323','23','23'],
+                label: 'Tasks completed',
+                data: <?= $tasks_completed_monthly; ?>,
                 backgroundColor: [
-                    'rgba(0, 140, 255, 0.26)'
+                'rgba(0, 140, 255, 0.26)'
                 ],
                 lineTension: 0
             }]

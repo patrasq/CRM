@@ -527,12 +527,33 @@ function get_month_name($month) {
     return $months[$month];
 }
 
-function insert_notification($notification, $receiver) {
+function sendMessage($text, $signalid){
+    $content = array(
+        "en" => $text
+    );
+
+    $fields = array(
+        'app_id' => "cc85030b-ce95-48bc-8d44-94905592bf15",
+        'data' => array("foo" => "bar"),
+        'include_player_ids' => array($signalid),
+        'contents' => $content
+    );
+
+    $fields = json_encode($fields);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8',
+                                               'Authorization: Basic "MmZmYWU2NDItMTI1OS00NDAyLTk0Y2EtNTI5NDQyMzhiYjli" '));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_POST, TRUE);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);    
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
     
-    $notification   =   html_purify($notification);
-    $receiver       =   (int)($receiver);
-    
-    $ci =& get_instance();
-    $query = $ci->db->query("INSERT INTO ".$this->config->config['tables']['notifications']."` (`Content`, `Receiver`) VALUES ('$notification', '$receiver')");
-    return ($query) ? true : false;
+    return $response;
 }

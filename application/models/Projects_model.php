@@ -93,6 +93,11 @@ class Projects_model extends CI_model {
         $this->db->update($this->config->config['tables']['issues'], $data);
         return TRUE;
     }
+    public function assign_project($id, $data) {
+        $this->db->where('ID', $id);
+        $this->db->update($this->config->config['tables']['projects'], $data);
+        return TRUE;
+    }
     public function complete_issue($data, $id) {
         $this->db->where('ID', $id);
         $this->db->update($this->config->config['tables']['issues'], $data);
@@ -105,7 +110,7 @@ class Projects_model extends CI_model {
         $this->db->from($this->config->config['tables']['projects']);
         $this->db->limit(1);
         $query = $this->db->get();
-        
+
         return ($query->num_rows() ? $query->result_array() : false);
 
     }
@@ -128,5 +133,47 @@ class Projects_model extends CI_model {
 
         if ($this->db->trans_status() === FALSE) die("should be error management :)");//offline_log("Failed transaction for insert_employee @ " . getdate("d-m-Y H:i:s"));
         return $lastId;
+    }
+
+    public function my_tasks($id) {
+        $array = array();
+
+        $query1 = $this->db->query("SELECT Name, ProjectID, Type, CompletedOn FROM ".$this->config->config['tables']['issues']." WHERE `AssignedTo` = '" . $this->session->userdata("logged_in")["ID"]."' AND `ProjectID` = ?", array($id));
+        if($query1->num_rows()) {
+            foreach($query1->result_array() as $row) {
+                $array[] = $row;
+            }
+        }
+
+        $query2 = $this->db->query("SELECT Name, ProjectID, CompleteDate FROM ".$this->config->config['tables']['milestones']." WHERE `AssignedTo` = '".$this->session->userdata('logged_in')["ID"]."' AND `ProjectID` = ?", array($id));
+        if($query2->num_rows()) {
+            foreach($query2->result_array() as $row) {
+                $row["Type"] = null;
+                $array[] = $row;
+            }
+        }
+
+        return $array;
+    }
+
+    public function discharge($data, $id) {
+        $this->db->where('ID', $id);
+        $this->db->update($this->config->config['tables']['projects'], $data);
+        return TRUE;
+    }
+
+    public function insert_notification($data) {
+        $this->db->trans_start();
+        $this->db->insert($this->config->config['tables']['notifications'], $data);
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) die("should be error management :)");//offline_log("Failed transaction for insert_employee @ " . getdate("d-m-Y H:i:s"));
+        return TRUE;
+    }
+    
+    public function deliver_project($data,$id) {
+        $this->db->where('ID', $id);
+        $this->db->update($this->config->config['tables']['projects'], $data);
+        return TRUE;
     }
 }
