@@ -3,6 +3,11 @@
     <br>
     <h3 class="title bigname"><?= html_purify($project_name); ?></h3>
     <br>
+    <?php if($this->session->userdata("logged_in")["Type"] == 1) {  ?>
+    <br>
+    <a href="<?= base_url("projects/discharge/" . $project_id); ?>" class="button custom-button-normal open-modal">discharge from this project</a>
+    <?php } ?>
+    <br>
     <div class="columns">
         <div class="column is-10">
 
@@ -21,8 +26,8 @@
                 <div id="general" class="content-tab" >
                     <div class="columns">
                         <div class="column">
-                            <h4 class="subtitle">Project delivery</h4>
-                            <progress class="progress is-medium <?= $progress_color; ?>" value="60" data-text="60" max="100">60%</progress>
+                            <h4 class="subtitle">Project delivery (<?= $completed_tasks; ?>/<?= $max_tasks; ?>)</h4>
+                            <progress class="progress is-medium <?= $progress_color; ?>" value="<?= $completed_tasks; ?>" data-text="<?= $max_tasks; ?>" max="<?= $max_tasks; ?>">60%</progress>
                             <br>
                         </div>
                         <div class="column">
@@ -44,7 +49,7 @@
                     <hr>
 
                     <h4 class="subtitle">Team</h4>
-                    <?php if($team_member){$incrementor = 1; foreach($team_member as $row) { ?>
+                    <?php if($team_member[0]['AssignedTo1'] != null||$team_member[0]['AssignedTo2'] != null||$team_member[0]['AssignedTo3'] != null||$team_member[0]['AssignedTo4'] != null||$team_member[0]['AssignedTo5'] != null){$incrementor = 1; foreach($team_member as $row) { ?>
                     <figure class="image is-128x128">
                         <img class="is-rounded" src="https://bulma.io/images/placeholders/128x128.png">
                     </figure>
@@ -78,7 +83,9 @@
                                                 <div class="column">
                                                     <?php
                                                     if($row["CompletedBy"] == null) {
-                                                        echo ($row["AssignedTo"]) ? "assigned to <a href='".get_profile($row["AssignedTo"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . "</a>" : "no one assigned"; }
+                                                        echo ($row["AssignedTo"]) ? "assigned to <a href='".get_profile($row["AssignedTo"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . "</a>" 
+                                                            : 
+                                                        "<abbr title='assign'>access any employee profile to assign this task</abbr>"; }
                                                     else echo "completed by<br> <a href='".get_profile($row["CompletedBy"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['CompletedBy']) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['CompletedBy']) . "</a>";
                                                     ?>
                                                 </div>
@@ -263,6 +270,10 @@
                         $("#positionselect").html(data);
                     }
                 });
+            });
+            
+            $(".assignemployee").on('click', function() {
+                $(".assignemployeevisibile").data($(this).data("milestone_id")).css("display", "block");
             });
         </script>
 

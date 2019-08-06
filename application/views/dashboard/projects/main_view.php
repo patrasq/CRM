@@ -173,7 +173,7 @@
 
 <script src="<?= base_url("assets/js/jquery.mask.js"); ?>"></script>
 <script>
-    $('#deadline').mask('00-00-0000', {reverse: true});
+    $('#projectdeadline').mask('00-00-0000', {reverse: true});
     var i = 0,
         csrfHash    = '<?= $this->security->get_csrf_hash(); ?>',
         csrfName    = $('#csrfTokenName').val();

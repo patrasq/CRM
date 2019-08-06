@@ -113,8 +113,7 @@ $text_finance_accounting    = "Accounting";
                 <ul class="menu-list">
                     <li>
                         <ul>
-                            <li><a <?= is_menu_active("teds"); ?> href="<?= base_url("ceo/teds"); ?>"><?= $text_teds; ?></a></li>
-                            <li><a <?= is_menu_active("agenda"); ?> href="<?= base_url("ceo/agenda"); ?>"><?= $text_agenda; ?></a></li>
+                            <li><a <?= is_menu_active("insights"); ?> href="<?= base_url("insights"); ?>">Overview</a></li>
                         </ul>
                     </li>
                 </ul>

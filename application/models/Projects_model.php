@@ -32,7 +32,7 @@ class Projects_model extends CI_model {
         if($cache) $this->db->cache_on();
 
         $this->db->select($data);
-        $this->db->from($this->config->config['tables']['projects']);
+        $this->db->from($this->config->config['tables']['projects'])->where("ID", $id)->limit(1);
         $query = $this->db->get();
 
         if($cache) $this->db->cache_off();
@@ -105,9 +105,8 @@ class Projects_model extends CI_model {
         $this->db->from($this->config->config['tables']['projects']);
         $this->db->limit(1);
         $query = $this->db->get();
-
         
-        return ($query ? $query->result_array() : false);
+        return ($query->num_rows() ? $query->result_array() : false);
 
     }
 

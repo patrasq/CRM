@@ -44,14 +44,66 @@ class Projects extends CI_Controller {
         $data["completed_issues"]            = countTable($this->config->config["tables"]["issues"], "WHERE CompletedBy > 0 AND ProjectID = '".$id."'");
         $data["max_issues"]                  = countTable($this->config->config["tables"]["issues"], "WHERE ProjectID = '".$id."'");
 
+        $data["completed_tasks"]            = countTable($this->config->config["tables"]["issues"], "WHERE CompletedBy > 0 AND ProjectID = '".$id."'") + countTable($this->config->config["tables"]["milestones"], "WHERE CompletedBy > 0 AND ProjectID = '".$id."'");
+        $data["max_tasks"]                  = countTable($this->config->config["tables"]["issues"], "WHERE ProjectID = '".$id."'") + countTable($this->config->config["tables"]["milestones"], "WHERE ProjectID = '".$id."'");
+
         $data["milestone"]                   = $this->Projects_model->get_milestones($id);
         $data["issue"]                       = $this->Projects_model->get_issues($id);
 
-        
+
         $data["team_member"]                 = $this->Projects_model->get_team(array("AssignedTo1", "AssignedTo2", "AssignedTo3", "AssignedTo4", "AssignedTo5"), $id);
+    
         $data["progress_color"]              = "is-danger";
 
         $data["main_content"]                = 'dashboard/projects/view_view';
+        $this->load->view('includes/template.php', $data);
+    }
+
+    public function discharge() {
+        if($this->session->userdata("logged_in")["Type"]) {
+            $id                                  = ($this->uri->segment(3)) ? (int)$this->uri->segment(3) : flash_redirect("error", "Invalid project.", base_url("projects"));
+            if(!countTable($this->config->config["tables"]["projects"], "WHERE `ID` = " . $id)) flash_redirect("error", "Invalid project.", base_url("projects"));
+
+            if(
+                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo1", $this->config->config["tables"]["projects"], "ID", $id) || 
+                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo2", $this->config->config["tables"]["projects"], "ID", $id) ||
+                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo3", $this->config->config["tables"]["projects"], "ID", $id) ||
+                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo4", $this->config->config["tables"]["projects"], "ID", $id) ||
+                $this->session->userdata("logged_in")["ID"] == get_info("AssignedTo5", $this->config->config["tables"]["projects"], "ID", $id)
+            ) {
+                if($this->session->userdata("logged_in")["ID"] == get_info("AssignedTo1", $this->config->config["tables"]["projects"], "ID", $id)) {
+                    $update_data    =   array(
+                        "AssignedTo1"   =>  NULL
+                    );
+                }
+                elseif($this->session->userdata("logged_in")["ID"] == get_info("AssignedTo2", $this->config->config["tables"]["projects"], "ID", $id)) {
+                    $update_data    =   array(
+                        "AssignedTo2"   =>  NULL
+                    );
+                }
+                elseif($this->session->userdata("logged_in")["ID"] == get_info("AssignedTo3", $this->config->config["tables"]["projects"], "ID", $id)) {
+                    $update_data    =   array(
+                        "AssignedTo3"   =>  NULL
+                    );
+                }
+                elseif($this->session->userdata("logged_in")["ID"] == get_info("AssignedTo4", $this->config->config["tables"]["projects"], "ID", $id)) {
+                    $update_data    =   array(
+                        "AssignedTo4"   =>  NULL
+                    );
+                }
+                elseif($this->session->userdata("logged_in")["ID"] == get_info("AssignedTo5", $this->config->config["tables"]["projects"], "ID", $id)) {
+                    $update_data    =   array(
+                        "AssignedTo5"   =>  NULL
+                    );
+                }
+                if($this->Projects_model->discharge($update_data)) {
+                    insert_notification(get_profile($this->session->userdata("logged_in")["ID"]) . " discharged from " . get_info("AssignedTo5", $this->config->config["tables"]["projects"], "ID", $id) . " project.", get_info("Supervizor", $this->config->config["tables"]["projects"], "ID", $id));
+                    flash_redirect("success", "Discharged successfully.", base_url("projects/")); 
+                } else flash_redirect("error", "Something went wrong", base_url("projects/"));
+            } else flash_redirect("error", "Something went wrong", base_url("projects/"));
+        } else flash_redirect("error", "Something went wrong", base_url("projects/"));
+
+        $data["main_content"]                = 'dashboard/projects/main_view';
         $this->load->view('includes/template.php', $data);
     }
 
@@ -73,7 +125,7 @@ class Projects extends CI_Controller {
             $this->input->post("projectdeadline")       !== null 
         )
         {
-            
+
             $name           =   html_purify($this->input->post("projectname"));
             $description    =   html_purify($this->input->post("projectdescription"));
             $deadline       =   html_purify($this->input->post("projectdeadline"));
@@ -81,14 +133,14 @@ class Projects extends CI_Controller {
             $verify         =   '{"invalid":[' . $json . ']}';
 
             if(!preg_match("/^([0-2][0-9]|(3)[0-1])(\-)(((0)[0-9])|((1)[0-2]))(\-)\d{4}$/", $deadline)) flash_redirect("error", "Something went wrong", base_url("projects/"));
-            
+
             $ob = json_decode($verify);
 
             if($ob === null) {
                 $this->output->set_header('HTTP/1.0 403 Forbidden');
                 die("Something went wrong.");
             }
-            
+
             $data       =   array(
                 "Name"          =>  $name,
                 "Description"   =>  $description,
@@ -111,7 +163,7 @@ class Projects extends CI_Controller {
                     "CompleteDate"  =>  NULL,
                     "CreateDate"    =>  date("d-m-Y", time())
                 );
-                
+
                 $i++;
             }
             if($return_id = $this->Projects_model->add_project($data, $data2)) {
@@ -148,7 +200,7 @@ class Projects extends CI_Controller {
             ($this->Projects_model->add_milestone($data, $this->session->userdata("logged_in")["ID"])) ? flash_redirect("success", "Milestone added succesfully", base_url("projects/view/" . $id)) : flash_redirect("error", "Something went wrong...", base_url("projects/view/" . $id));
         } else flash_redirect("error", "Something went wrong...", base_url("projects/view/" . $id));
     }
-    
+
     public function assign_milestone() {
         if($this->uri->segment(3) != null) {
             $id         =       (int)$this->uri->segment(3);
@@ -211,7 +263,7 @@ class Projects extends CI_Controller {
             }  else flash_redirect("error", "Something went wrong...", base_url("projects/view/" . $id));
         } else flash_redirect("error", "Something went wrong...", base_url("projects/view/" . $id));
     }
-    
+
     public function assign_issue() {
         if($this->uri->segment(3) != null) {
             $id         =       (int)$this->uri->segment(3);

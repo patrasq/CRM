@@ -112,22 +112,24 @@ class HR extends CI_Controller {
 
             $this->load->model('Dashboard_model');
 
-            $data['text_delete_employee']       = "Delete employee";
+            $data['text_delete_employee']       =   "Delete employee";
 
-            $data['text_tab1']                  = $this->lang->line('employee_tab1');
-            $data['text_tab2']                  = $this->lang->line('employee_tab2');
-            $data['text_tab3']                  = $this->lang->line('employee_tab3');
+            $data['text_tab1']                  =   $this->lang->line('employee_tab1');
+            $data['text_tab2']                  =   $this->lang->line('employee_tab2');
+            $data['text_tab3']                  =   $this->lang->line('employee_tab3');
 
 
-            $data["completed_tasks"]            = countTable($this->config->config["tables"]["issues"], "WHERE CompletedBy = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE CompletedBy = '".$this->uri->segment(3)."'");
-            $data["max_tasks"]                  = countTable($this->config->config["tables"]["issues"], "WHERE AssignedTo = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE AssignedTo = '".$this->uri->segment(3)."'");
+            $data["completed_tasks"]            =   countTable($this->config->config["tables"]["issues"], "WHERE CompletedBy = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE CompletedBy = '".$this->uri->segment(3)."'");
+            $data["max_tasks"]                  =   countTable($this->config->config["tables"]["issues"], "WHERE AssignedTo = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE AssignedTo = '".$this->uri->segment(3)."'");
 
-            $data["completed_issues"]           = countTable($this->config->config["tables"]["issues"], "WHERE CompletedBy = '".$this->uri->segment(3)."'");
-            $data["max_issues"]                 = countTable($this->config->config["tables"]["issues"], "WHERE AssignedTo = '".$this->uri->segment(3)."'") ;
+            $data["completed_issues"]           =   countTable($this->config->config["tables"]["issues"], "WHERE CompletedBy = '".$this->uri->segment(3)."'");
+            $data["max_issues"]                 =   countTable($this->config->config["tables"]["issues"], "WHERE AssignedTo = '".$this->uri->segment(3)."'") ;
 
-            $data["completed_milestones"]       = countTable($this->config->config["tables"]["milestones"], "WHERE CompletedBy = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE CompletedBy = '".$this->uri->segment(3)."'");
-            $data["max_milestones"]             = countTable($this->config->config["tables"]["milestones"], "WHERE AssignedTo = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE AssignedTo = '".$this->uri->segment(3)."'");
+            $data["completed_milestones"]       =   countTable($this->config->config["tables"]["milestones"], "WHERE CompletedBy = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE CompletedBy = '".$this->uri->segment(3)."'");
+            $data["max_milestones"]             =   countTable($this->config->config["tables"]["milestones"], "WHERE AssignedTo = '".$this->uri->segment(3)."'") + countTable($this->config->config["tables"]["milestones"], "WHERE AssignedTo = '".$this->uri->segment(3)."'");
 
+            $data["open_project"]               =   $this->HR_model->get_projects(array("ID", "Name"));
+            
             $var1                               =   $this->Dashboard_model->get_tasks();
             $var2                               =   $this->Dashboard_model->get_issues_graph();
             $var3                               =   $this->Dashboard_model->get_milestones_graph();

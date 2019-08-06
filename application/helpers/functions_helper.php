@@ -526,3 +526,13 @@ function get_month_name($month) {
     $months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
     return $months[$month];
 }
+
+function insert_notification($notification, $receiver) {
+    
+    $notification   =   html_purify($notification);
+    $receiver       =   (int)($receiver);
+    
+    $ci =& get_instance();
+    $query = $ci->db->query("INSERT INTO ".$this->config->config['tables']['notifications']."` (`Content`, `Receiver`) VALUES ('$notification', '$receiver')");
+    return ($query) ? true : false;
+}

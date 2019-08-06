@@ -18,7 +18,7 @@ class Insights extends CI_Controller
     }
 
     function index() {
-        $data["main_content"] = 'dashboard/insights';
+        $data["main_content"] = 'dashboard/insights_view';
         $this->load->view('includes/template.php', $data);
     }
 

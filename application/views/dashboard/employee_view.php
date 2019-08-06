@@ -17,7 +17,7 @@
             <ul>
                 <li class="tab is-active" onclick="openTab(event,'general')"><a>General</a></li>
                 <li class="tab" onclick="openTab(event,'activity')"><a>Activity</a></li>
-                <li class="tab" onclick="openTab(event,'documents')"><a>Documents</a></li>
+                <li class="tab" onclick="openTab(event,'other')"><a>Other</a></li>
             </ul>
         </div>
     </nav>
@@ -110,12 +110,27 @@
             <h3 class="subtitle">Milestones completed (<?= $completed_milestones; ?>/<?= $max_milestones; ?>)</h3>
             <progress class="progress is-medium is-danger" value="<?= $completed_milestones; ?>" max="<?= $max_milestones; ?>">60%</progress>
         </div>
-        <div id="documents" class="content-tab" style="display:none">
+        <div id="other" class="content-tab" style="display:none">
             <table class="table is-striped is-narrow is-hoverable is-fullwidth">
                 <tbody>
                     <tr>
                         <th>Export excel data (.xsls)</th>
                         <td><a href="<?= base_url("hr/download_excel/" . $employee_id); ?>">Download</a></td>
+                    </tr>
+                    <tr>
+                        <th>Assign project</th>
+                        <?php echo form_open(base_url("hr/force_assign_project/" . $employee_id)); ?>
+                        <td>
+                            <select name="project" class="input">
+                                <?php foreach($open_project as $row) { ?>
+                                <option value="<?= $row['ID']; ?>"><?= $row['Name']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </td>
+                        <td>
+                            <button type="submit" class="button">Submit</button>
+                        </td>
+                        <?php echo form_close(); ?>
                     </tr>
                 </tbody>
             </table>

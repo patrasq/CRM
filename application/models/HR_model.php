@@ -126,6 +126,14 @@ class HR_model extends CI_model {
 
         if($this->db->query("UPDATE `" . $this->config->config['tables']['bank_employees'] . "` SET $modifier = ? WHERE `EmployeeID` = ? LIMIT 1", array($new_value, $user_id))) return TRUE;
     }
+    
+    public function get_projects($data) {
+ 
+        $x = $this->db->select(array("ID", "Name"))->from($this->config->config['tables']['projects'])->where('Status', '0')->get();
+
+        return ($x->num_rows()) ? $x->result_array() : false;
+
+    }
 
 
 }
