@@ -68,27 +68,65 @@
                     <div class="content has-text-centered">
                         <h4 class="subtitle">Your projects</h4>
 
-                
+
                         <div class="box dashboardtablebox">
-                            <article class="media">
+
+                            <?php foreach($project as $row) { ?>
+                            <article class="media" style="color:#fff!important">
                                 <div class="media-content">
                                     <div class="content">
                                         <div class="columns">
                                             <div class="column is-one-quarter">
-                                                <span>s</span>
+                                                <span><?= $row["Name"]; ?></span>
                                             </div>
                                             <div class="column">
-                                                <span><a href="s"></a></span>
+                                                <span><?= $row["Description"]; ?></span>
+                                            </div>
+                                            <div class="column">
+                                                <span><a class="button is-primary is-rounded" href="<?= base_url("projects/view/" . $row["ID"]); ?>">Go</a></span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </article>
+
+                            <?php } ?>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
+            <?php if($this->session->userdata("logged_in")["Type"] == 1) { ?>
+            <br>
+            <div class="card modern-shadow aos-init aos-animate" style="background:linear-gradient(45deg,#3690ff,#00d2ff 100%);margin-left: 12px;margin-right: 11px;" data-aos="fade-up" data-aos-delay="100" data-aos-offset="200" data-aos-easing="ease-out-quart">
+                <div class="card-content">
+                    <div class="content has-text-centered">
+                        <h4 class="subtitle">Your tasks</h4>
+
+
+                        <div class="box dashboardtablebox">
+                            <div class="columns is-multiline">
+                                <?php foreach($task as $row) {  ?>
+                                    <div class="column is-one-third">
+                                        <div class="card modern-shadow" style="background:<?= $gradients[array_rand($gradients)]; ?>" data-aos="fade-up" data-aos-delay="450" data-aos-offset="200" data-aos-easing="ease-out-quart" class="aos-init aos-animate">
+                                            <div class="card-content">
+                                                <div class="content">
+                                                    <h5 class="subtitle"><?= $row["Name"]; ?></h5>
+                                                    <?php if($row["Type"] != null) echo '<span style="border-color: #fff;color: #fff;" class="button is-small is-outlined '.get_issue_color($row["Type"]) . '">' .$row["Type"] . '</span>'; else echo "MILESTONE"; ?>
+                                                    <br><br>
+                                                    <a class="button is-outlined is-light" href="<?= base_url("projects/view/".$row["ProjectID"]); ?>">See project</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
         </div>
     </div>
 </div>
@@ -131,6 +169,10 @@
     table {
         border-spacing: 0 15px !important;
         border-collapse: initial;
+    }
+    h5 {
+        text-shadow: 0px 0px 3px #000;
+        color: #fff !important;
     }
 </style>
 <script>

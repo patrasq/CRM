@@ -43,10 +43,14 @@
                     <label class="label" style="display:inline-block;">Time left</label> &nbsp; <abbr title="<?= $project_deadline; ?>"><?= get_time_difference($project_deadline); ?></abbr>
                     <hr>
 
-                    <h4 class="subtitle">Time management</h4>
-                    <label class="label" style="display:inline-block;">Milestones per day</label> &nbsp; <abbr title="<?= $project_deadline; ?>"><?= get_time_difference($project_deadline); ?></abbr>
+                    <h4 class="subtitle">Team</h4>
+                    <?php if($team_member){$incrementor = 1; foreach($team_member as $row) { ?>
+                    <figure class="image is-128x128">
+                        <img class="is-rounded" src="https://bulma.io/images/placeholders/128x128.png">
+                    </figure>
                     <br>
-                    <label class="label" style="display:inline-block;">Milestones per week</label> &nbsp; <abbr title="<?= $project_deadline; ?>"><?= get_time_difference($project_deadline); ?></abbr>
+                    <span><a href='<?= get_profile($row["AssignedTo".$incrementor]); ?>'><?= get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo' . $incrementor]) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo' . $incrementor]); ?></a></span>
+                    <?php $incrementor++; }}else echo "No team member."; ?>
                     <hr>
 
                     <h4 class="subtitle">Time management</h4>
@@ -73,16 +77,28 @@
                                                 </div>
                                                 <div class="column">
                                                     <?php
-                                                    echo ($row["AssignedTo"]) ? "assigned to <a href='".get_profile($row["AssignedTo"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['accounts_detailed'], "UserID", $row['AssignedTo']) . " " . get_cached_info("LastName", $this->config->config['tables']['accounts_detailed'], "UserID", $row['AssignedTo']) . "</a>" : "no one assigned";
+                                                    if($row["CompletedBy"] == null) {
+                                                        echo ($row["AssignedTo"]) ? "assigned to <a href='".get_profile($row["AssignedTo"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . "</a>" : "no one assigned"; }
+                                                    else echo "completed by<br> <a href='".get_profile($row["CompletedBy"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['CompletedBy']) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['CompletedBy']) . "</a>";
                                                     ?>
                                                 </div>
                                                 <div class="column">
                                                     <span style="text-align:right;display:block">
-                                                        <?php if($this->session->userdata("logged_in")["Type"] == 1 && $row["CompletedBy"] != null) { ?>
+                                                        <?php 
+                                                        if($this->session->userdata("logged_in")["Type"] == 1) {
+                                                            if($row["CompletedBy"] == null) {
+                                                                if($row["AssignedTo"] == null) {
+                                                        ?>
                                                         <a href="<?= base_url("projects/assign_milestone/" . $row["ID"]); ?>">
-                                                            <?= get_project_status($row["CompletedBy"]); ?>
+                                                            assign milestone
                                                         </a>
-                                                        <?php } else { ?>
+                                                        <?php 
+                                                                } elseif($row["AssignedTo"] == $this->session->userdata("logged_in")["ID"]) { ?>
+                                                        <a href="<?= base_url("projects/assign_milestone/" . $row["ID"]); ?>">
+                                                            mark as complete
+                                                        </a>
+                                                        <?php } else echo get_project_status($row["CompletedBy"]); } else echo get_project_status($row["CompletedBy"]);
+                                                        } else { ?>
                                                         <?= get_project_status($row["CompletedBy"]); ?>
                                                         <?php } ?>
                                                     </span>
@@ -120,16 +136,28 @@
                                                 </div>
                                                 <div class="column">
                                                     <?php
-                                            echo ($row["AssignedTo"]) ? "assigned to <a href='".get_profile($row["AssignedTo"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['accounts_detailed'], "UserID", $row['AssignedTo']) . " " . get_cached_info("LastName", $this->config->config['tables']['accounts_detailed'], "UserID", $row['AssignedTo']) . "</a>" : "<span class='assignmilestone' data-id='".$row["ID"]."'>no one assigned</span>";
+                                            if($row["CompletedBy"] == null) {
+                                                echo ($row["AssignedTo"]) ? "assigned to <a href='".get_profile($row["AssignedTo"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['AssignedTo']) . "</a>" : "no one assigned"; }
+                                            else echo "completed by<br> <a href='".get_profile($row["CompletedBy"])."'>" . get_cached_info("FirstName", $this->config->config['tables']['employees'], "ID", $row['CompletedBy']) . " " . get_cached_info("LastName", $this->config->config['tables']['employees'], "ID", $row['CompletedBy']) . "</a>";
                                                     ?>
                                                 </div>
                                                 <div class="column">
                                                     <span style="text-align:right;display:block">
-                                                        <?php if($this->session->userdata("logged_in")["Type"] == 1 && $row["CompletedBy"] != null) { ?>
-                                                        <a href="<?= base_url("projects/assign_bug/" . $row["ID"]); ?>">
-                                                            <?= get_project_status($row["CompletedBy"]); ?>
+                                                        <?php 
+                                            if($this->session->userdata("logged_in")["Type"] == 1) {
+                                                if($row["CompletedBy"] == null) {
+                                                    if($row["AssignedTo"] == null) {
+                                                        ?>
+                                                        <a href="<?= base_url("projects/assign_issue/" . $row["ID"]); ?>">
+                                                            assign issue
                                                         </a>
-                                                        <?php } else { ?>
+                                                        <?php 
+                                                    } elseif($row["AssignedTo"] == $this->session->userdata("logged_in")["ID"]) { ?>
+                                                        <a href="<?= base_url("projects/assign_issue/" . $row["ID"]); ?>">
+                                                            mark as complete
+                                                        </a>
+                                                        <?php } else echo get_project_status($row["CompletedBy"]); } else echo get_project_status($row["CompletedBy"]);
+                                            } else { ?>
                                                         <?= get_project_status($row["CompletedBy"]); ?>
                                                         <?php } ?>
                                                     </span>
@@ -203,10 +231,10 @@
                                             <div class="select is-rounded">
                                                 <select name="type" required>
                                                     <option value="bug">Bug</option>
-                                                    <option value="bug">Documentation</option>
-                                                    <option value="bug">Duplicate</option>
-                                                    <option value="bug">Enhancement</option>
-                                                    <option value="bug">Wontfix</option>
+                                                    <option value="documentation">Documentation</option>
+                                                    <option value="duplicate">Duplicate</option>
+                                                    <option value="enhancement">Enhancement</option>
+                                                    <option value="wontfix">Wontfix</option>
                                                 </select>
                                             </div>
                                         </div>

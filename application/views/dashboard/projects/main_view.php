@@ -1,7 +1,9 @@
 <?php $this->load->view('dashboard/menu'); ?>
 <div class="column" style="width:98%">
     <br>
-    <a href="#" class="button custom-button-normal open-modal" data-modal-id="#addproject">Add project</a>
+    <?php if($this->session->userdata("logged_in")["Type"] == 2){ ?>
+        <a href="#" class="button custom-button-normal open-modal" data-modal-id="#addproject">Add project</a>
+    <?php } ?>
     <br><br><br><br>
     <h1 class="title bigname">Your projects</h1>
     <table class="table" style="width:98%">
@@ -219,11 +221,11 @@
                 },
                 success:function(response)
                 {
-               //     document.location = "<?= base_url("project/view/"); ?>"  + response.returnId;
+                    document.location = "<?= base_url("project/view/"); ?>"  + response.returnId;
                 },
                 error: function(response) 
                 {
-                 //   document.location = "<?= base_url("projects/"); ?>";
+                    document.location = "<?= base_url("projects/"); ?>";
                 }
             }
         ); 

@@ -29,6 +29,11 @@ class Dashboard extends CI_Controller {
             case 1:
                 $data["card_one_data"]      =   "1";
                 $data["card_one_label"]     =   "Label";
+                
+                $data["card_two_data"]      =   countTable($this->config->config["tables"]["projects"], "WHERE `Status` = 0 AND AssignedTo1 = " . $this->session->userdata("logged_in")["ID"] . " OR AssignedTo2 = " . $this->session->userdata("logged_in")["ID"] . " OR AssignedTo3 = " . $this->session->userdata("logged_in")["ID"] . " OR AssignedTo4 = " . $this->session->userdata("logged_in")["ID"] . " OR AssignedTo5 = " . $this->session->userdata("logged_in")["ID"]);
+                $data["card_two_label"]     =   "Your active Projects";
+                
+                $data["task"]               =   $this->Dashboard_model->get_tasks();
             break;
             case 2:
                 $data["card_one_data"]      =   countTable($this->config->config["tables"]["employees"]);
@@ -38,6 +43,14 @@ class Dashboard extends CI_Controller {
                 $data["card_two_label"]     =   "Active Projects";
             break;
         }
+        
+        $data["gradients"]                  =   array(
+            "linear-gradient(45deg,#ffa836,#ffcf00 100%)",
+            "linear-gradient(45deg,#3690ff,#00d2ff 100%)",
+            "linear-gradient(45deg,#de36ff,#9600ff 100%)",
+            "linear-gradient(45deg,#36ff38,#0bd71c 100%)"
+        );
+        $data["project"]                    =   $this->Dashboard_model->get_projects();
         
         $data["main_content"]       = 'dashboard/dashboard_view';
         $this->load->view('includes/template.php', $data);
@@ -136,9 +149,6 @@ class Dashboard extends CI_Controller {
 
 
     public function settings() {
-
-        $data['my_business_id']             = get_cached_info("ID", $this->config->config['tables']['businesses'], "Owner", $this->session->userdata("logged_in")["ID"]);
-        $data['my_business_name']           = get_cached_info("Name", $this->config->config['tables']['businesses'], "Owner", $this->session->userdata("logged_in")["ID"]);
 
         $data["main_content"]   = 'dashboard/settings_view';
         $this->load->view('includes/template.php', $data);

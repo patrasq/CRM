@@ -88,8 +88,16 @@ function get_cached_info($selector, $table, $firstkey, $key) {
     $ci =& get_instance();
     $ci->db->cache_on();
     $query = $ci->db->query("SELECT `".$selector."` FROM `".$table."` WHERE `".$firstkey."` = '".$key."' ");
-    return (isset($query->result()[0]->$selector) ? $query->result()[0]->$selector: "unknown");
+    return ((isset($query->result()[0]->$selector)) ? $query->result()[0]->$selector : "unknown");
 }
+
+function get_cached_info_null($selector, $table, $firstkey, $key) {
+    $ci =& get_instance();
+    $ci->db->cache_on();
+    $query = $ci->db->query("SELECT `".$selector."` FROM `".$table."` WHERE `".$firstkey."` = '".$key."' ");
+    return $query->result()[0]->$selector;
+}
+
 
 function countTable($table, $extra = "") {
     $ci =& get_instance();
@@ -491,7 +499,7 @@ function get_project_status($status) {
 }
 
 function get_profile($id) {
-    return base_url("employee/" . (int)$id);
+    return base_url("hr/employee/" . (int)$id);
 }
 
 function get_issue_color($type) {
@@ -512,4 +520,9 @@ function get_issue_color($type) {
             return "is-warning";
             break;
     }
+}
+
+function get_month_name($month) {
+    $months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    return $months[$month];
 }

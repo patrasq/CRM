@@ -82,7 +82,7 @@ $text_finance_accounting    = "Accounting";
                 </p>
                 <ul class="menu-list">
                     <li><a href="<?= base_url("dashboard"); ?>" <?= is_menu_active("dashboard", "shouldbeerror"); ?>><?= $text_home; ?></a></li>
-                    <li><a href="<?= base_url("dashboard/settings"); ?>" <?= is_menu_active("settings"); ?>><?= $text_settings; ?></a></li>
+                    <li><a href="<?= base_url("settings/account"); ?>" <?= is_menu_active("settings"); ?>><?= $text_settings; ?></a></li>
                 </ul>
                 <p class="menu-label">
                     <?= $text_hr; ?>

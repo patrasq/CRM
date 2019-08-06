@@ -23,13 +23,13 @@ class HR_model extends CI_model {
     * @param string $fetch_data Data to retrieve
     * @return array Fetched data 
     */
-    function get_departments($fetch_data) {
+    function get_departments() {
         $this->db->cache_on();
-        
-        $this->db->select($fetch_data)
-            ->where('BusinessID', get_cached_info("ID", $this->config->config['tables']['businesses'], "Owner", $this->session->userdata("logged_in")["ID"]));
 
-        $q = $this->db->get($this->config->config['tables']['departments']);
+        $this->db->select("*");
+        $this->db->from($this->config->config['tables']['departments']);
+
+        $q = $this->db->get();
         if($q->num_rows()) {
             foreach ($q->result() as $row) $data[] = $row;
             return $data;
@@ -45,16 +45,16 @@ class HR_model extends CI_model {
     */
     function get_employees($fetch_data) {
         $this->db->cache_on();
-        
-        $this->db->select($fetch_data)
-            ->where('BusinessID', get_cached_info("ID", $this->config->config['tables']['businesses'], "Owner", $this->session->userdata("logged_in")["ID"]));
 
-        $q = $this->db->get($this->config->config['tables']['employees']);
+        $this->db->select($fetch_data);
+        $this->db->from($this->config->config['tables']['employees']);
+
+        $q = $this->db->get();
         if($q->num_rows()) {
             foreach ($q->result() as $row) $data[] = $row;
             return $data;
         } else return FALSE;
-        
+
     }
 
     function get_employee_info($id, $info = "ID") {
@@ -72,7 +72,7 @@ class HR_model extends CI_model {
         if($query->num_rows()) return $query->result()[0]->$info;
         else return 0;
     }
-    
+
     function insert_employee($data) {
         $this->db->trans_start();
         $this->db->insert($this->config->config['tables']['employees'], $data);
@@ -95,7 +95,7 @@ class HR_model extends CI_model {
         $this->db->update($this->config->config['tables']['departments'], $data);
         return TRUE;
     }
-    
+
     public function insert_department($data) {
         $this->db->trans_start();
         $this->db->insert($this->config->config['tables']['departments'], $data);
@@ -123,8 +123,9 @@ class HR_model extends CI_model {
                 $modifier = "BIN";
                 break;
         }
-        
+
         if($this->db->query("UPDATE `" . $this->config->config['tables']['bank_employees'] . "` SET $modifier = ? WHERE `EmployeeID` = ? LIMIT 1", array($new_value, $user_id))) return TRUE;
     }
+
 
 }
